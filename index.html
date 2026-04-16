@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshShare — Lo-Fi Prototype</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F0EFE8; min-height: 100vh; padding: 24px 16px; }
+  h1 { font-size: 22px; font-weight: 600; color: #2D2D2A; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #73726C; margin-bottom: 24px; }
+  .nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .nav button { background: #fff; border: 1.5px solid #DDD; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; color: #555; transition: all .2s; }
+  .nav button.active { background: #2D5A27; border-color: #2D5A27; color: #fff; font-weight: 500; }
+  .main { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+  .phone-stage { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .screen-name { font-size: 11px; color: #888; letter-spacing: .06em; text-transform: uppercase; }
+  .phone { width: 260px; background: #FAFAF8; border-radius: 36px; border: 3px solid #333; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.15); }
+  .notch { background: #333; height: 24px; border-radius: 0 0 16px 16px; width: 90px; margin: 0 auto; }
+  .body { min-height: 500px; }
+  .home-bar { height: 5px; background: #ccc; border-radius: 3px; width: 70px; margin: 10px auto 8px; }
+  .panel { display: none; }
+  .panel.on { display: block; }
+  /* s1 */
+  .s1-hdr { background: #2D5A27; padding: 22px 18px 16px; }
+  .s1-logo { font-size: 20px; font-weight: 600; color: #fff; }
+  .s1-tagline { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 3px; }
+  .s1-card { background: #fff; border-radius: 14px; margin: 14px; padding: 14px; }
+  .s1-card-h { font-size: 13px; font-weight: 600; color: #2D5A27; margin-bottom: 10px; }
+  .bldg { background: #F0F7EB; border: 1.5px solid #97C459; border-radius: 10px; padding: 11px 13px; margin-bottom: 8px; cursor: pointer; transition: border-color .2s; }
+  .bldg:hover { border-color: #2D5A27; }
+  .bldg-name { font-size: 13px; font-weight: 600; color: #27500A; }
+  .bldg-floor { font-size: 10px; color: #639922; margin-top: 2px; }
+  .avatars { display: flex; align-items: center; margin-top: 8px; }
+  .av { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: #fff; border: 1.5px solid #fff; margin-right: -5px; }
+  .count { font-size: 10px; color: #555; margin-left: 12px; }
+  .trust-note { background: #FFF8EC; border: 1px solid #FAC775; border-radius: 8px; padding: 9px 11px; margin: 8px 0; font-size: 10.5px; color: #633806; line-height: 1.45; }
+  .btn-grn { background: #2D5A27; color: #fff; border: none; border-radius: 10px; padding: 12px; width: 100%; font-size: 13px; font-weight: 500; cursor: pointer; margin-top: 4px; }
+  .link-sm { text-align: center; margin-top: 8px; font-size: 10.5px; color: #888; cursor: pointer; }
+  /* s2 */
+  .s2-hdr { background: #fff; padding: 14px 16px 11px; border-bottom: 1px solid #EEE; display: flex; align-items: center; gap: 10px; }
+  .back { font-size: 20px; color: #444; cursor: pointer; }
+  .s2-title { font-size: 15px; font-weight: 600; color: #2D2D2A; }
+  .scan-zone { background: #1E1E1C; margin: 14px; border-radius: 12px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; cursor: pointer; }
+  .scan-frame { width: 42px; height: 42px; border: 2.5px solid rgba(255,255,255,.5); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .scan-inner { width: 20px; height: 20px; border: 2px solid #fff; border-radius: 3px; }
+  .scan-txt { font-size: 12px; color: rgba(255,255,255,.75); }
+  .orline { display: flex; align-items: center; gap: 8px; margin: 0 14px 10px; }
+  .orline hr { flex: 1; border: none; border-top: 1px solid #EEE; }
+  .orline span { font-size: 10px; color: #AAA; }
+  .field { margin: 0 14px 9px; }
+  .field label { font-size: 10px; color: #999; display: block; margin-bottom: 3px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+  .field input, .field select { width: 100%; border: 1px solid #DDD; border-radius: 7px; padding: 8px 9px; font-size: 12px; background: #fff; color: #2D2D2A; }
+  .half { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 14px 9px; }
+  .auto-tag { margin: 0 14px 10px; background: #EAF3DE; border-radius: 7px; padding: 7px 10px; font-size: 10.5px; color: #27500A; display: flex; align-items: center; gap: 6px; }
+  /* s3 */
+  .s3-hdr { background: #fff; padding: 14px 16px 11px; border-bottom: 1px solid #EEE; }
+  .s3-title { font-size: 15px; font-weight: 600; color: #2D2D2A; }
+  .tabs { display: flex; margin: 10px 14px; background: #EEECEA; border-radius: 8px; padding: 2px; }
+  .tab { flex: 1; text-align: center; font-size: 10.5px; padding: 5px 2px; border-radius: 6px; cursor: pointer; color: #888; }
+  .tab.active { background: #fff; color: #2D2D2A; font-weight: 600; }
+  .alert-card { background: #FFF4EC; border: 1.5px solid #FAC775; border-radius: 11px; margin: 0 14px 9px; padding: 11px 13px; }
+  .alert-h { font-size: 12px; font-weight: 600; color: #633806; margin-bottom: 3px; }
+  .alert-b { font-size: 10.5px; color: #854F0B; line-height: 1.45; }
+  .alert-btns { display: flex; gap: 7px; margin-top: 9px; }
+  .abtn { flex: 1; border: none; border-radius: 7px; padding: 7px; font-size: 10.5px; font-weight: 600; cursor: pointer; }
+  .abtn.p { background: #2D5A27; color: #fff; }
+  .abtn.s { background: #F0EFE8; color: #555; }
+  .item { background: #fff; border-radius: 9px; margin: 0 14px 6px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #EEE; }
+  .item-name { font-size: 12.5px; font-weight: 500; color: #2D2D2A; }
+  .item-exp { font-size: 10px; color: #999; margin-top: 2px; }
+  .badge { font-size: 9.5px; padding: 2px 8px; border-radius: 5px; font-weight: 600; }
+  .badge.r { background: #FCEBEB; color: #A32D2D; }
+  .badge.a { background: #FAEEDA; color: #633806; }
+  .badge.g { background: #EAF3DE; color: #27500A; }
+  .share-nudge { background: #F0F7EB; border: 1.5px dashed #97C459; border-radius: 10px; margin: 0 14px 10px; padding: 10px 12px; display: flex; align-items: center; gap: 9px; }
+  .share-icon { width: 30px; height: 30px; background: #639922; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; }
+  .share-txt { font-size: 10.5px; color: #27500A; line-height: 1.4; flex: 1; }
+  .share-btn { background: #2D5A27; color: #fff; border: none; border-radius: 6px; padding: 6px 10px; font-size: 10px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+  /* annotations */
+  .annotations { flex: 1; min-width: 260px; max-width: 500px; }
+  .ann-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #73726C; margin-bottom: 12px; }
+  .ann { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+  .ann-num { width: 24px; height: 24px; background: #2D5A27; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; margin-top: 1px; }
+  .ann-body { font-size: 13px; line-height: 1.6; color: #3D3D3A; }
+  .ann-body strong { font-weight: 600; color: #2D2D2A; }
+  .atag { display: inline-block; background: #FCEBEB; border-radius: 4px; padding: 1px 8px; font-size: 10px; font-weight: 600; color: #A32D2D; margin-top: 4px; }
+</style>
+</head>
+<body>
+<h1>FreshShare — Lo-Fi Prototype</h1>
+<p class="subtitle">3 interactive screens · Assumption testing prototype</p>
+
+<div class="nav">
+  <button class="active" onclick="show(0)">① Building Join</button>
+  <button onclick="show(1)">② Add Food Item</button>
+  <button onclick="show(2)">③ Expiry Alert + Share</button>
+</div>
+
+<div class="main">
+  <div class="phone-stage">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="body">
+
+        <!-- SCREEN 1 -->
+        <div class="panel on" id="p0">
+          <div class="s1-hdr">
+            <div class="s1-logo">FreshShare</div>
+            <div class="s1-tagline">Reduce food waste with your neighbours</div>
+          </div>
+          <div class="s1-card">
+            <div class="s1-card-h">Join your building community</div>
+            <div class="bldg" onclick="show(1)">
+              <div class="bldg-name">Skyline Residences, Andheri</div>
+              <div class="bldg-floor">Wing B · Floor 4</div>
+              <div class="avatars">
+                <div class="av" style="background:#639922">RK</div>
+                <div class="av" style="background:#378ADD">PM</div>
+                <div class="av" style="background:#BA7517">AS</div>
+                <div class="av" style="background:#9c3daa">JD</div>
+                <span class="count">+14 neighbours joined</span>
+              </div>
+            </div>
+            <div class="trust-note">✓ All residents verified by building entry code. Items shared include a quality rating from the giver.</div>
+            <button class="btn-grn" onclick="show(1)">Join my building →</button>
+          </div>
+          <div class="link-sm">I'll add my building manually instead</div>
+        </div>
+
+        <!-- SCREEN 2 -->
+        <div class="panel" id="p1">
+          <div class="s2-hdr">
+            <div class="back" onclick="show(0)">‹</div>
+            <div class="s2-title">Add food item</div>
+          </div>
+          <div class="scan-zone" onclick="show(1)">
+            <div class="scan-frame"><div class="scan-inner"></div></div>
+            <div class="scan-txt">Tap to scan barcode</div>
+          </div>
+          <div class="orline"><hr><span>or enter manually</span><hr></div>
+          <div class="field">
+            <label>Item name</label>
+            <input type="text" value="Greek Yogurt" readonly>
+          </div>
+          <div class="half">
+            <div class="field" style="margin:0">
+              <label>Quantity</label>
+              <input type="text" value="1 pack" readonly>
+            </div>
+            <div class="field" style="margin:0">
+              <label>Category</label>
+              <select><option>Dairy</option></select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Expiry date</label>
+            <input type="text" value="22 Apr 2026" readonly>
+          </div>
+          <div class="auto-tag">✦ Auto-detected from barcode scan</div>
+          <button class="btn-grn" style="margin:0 14px;width:calc(100% - 28px)" onclick="show(2)">Save to my pantry</button>
+        </div>
+
+        <!-- SCREEN 3 -->
+        <div class="panel" id="p2">
+          <div class="s3-hdr">
+            <div class="s3-title">My Pantry</div>
+          </div>
+          <div class="tabs">
+            <div class="tab active">All items</div>
+            <div class="tab">Expiring</div>
+            <div class="tab">Shared</div>
+          </div>
+          <div class="alert-card">
+            <div class="alert-h">Expires in 2 days — Greek Yogurt</div>
+            <div class="alert-b">You haven't used this yet. Share it with a neighbour before it goes bad?</div>
+            <div class="alert-btns">
+              <button class="abtn p">Share with building</button>
+              <button class="abtn s">I'll use it</button>
+            </div>
+          </div>
+          <div class="item">
+            <div><div class="item-name">Greek Yogurt</div><div class="item-exp">Expires 18 Apr</div></div>
+            <span class="badge r">2 days</span>
+          </div>
+          <div class="item">
+            <div><div class="item-name">Whole Wheat Bread</div><div class="item-exp">Expires 20 Apr</div></div>
+            <span class="badge a">4 days</span>
+          </div>
+          <div class="item">
+            <div><div class="item-name">Spinach</div><div class="item-exp">Expires 25 Apr</div></div>
+            <span class="badge g">9 days</span>
+          </div>
+          <div class="share-nudge">
+            <div class="share-icon">↗</div>
+            <div class="share-txt">3 neighbours want Dairy items this week. Share your surplus?</div>
+            <button class="share-btn">Post</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="home-bar"></div>
+    </div>
+    <div class="screen-name" id="screen-label">Screen 1 of 3 — Building Join</div>
+  </div>
+
+  <!-- Annotations -->
+  <div class="annotations" id="ann-0">
+    <div class="ann-title">Screen annotations</div>
+    <div class="ann">
+      <div class="ann-num">1</div>
+      <div class="ann-body"><strong>Neighbour count & avatars</strong> — showing how many residents have already joined addresses the critical-mass problem surfaced in peer testing. If the number is too low, users won't join. <span class="atag">Tests A2: Neighbour trust</span></div>
+    </div>
+    <div class="ann">
+      <div class="ann-num">2</div>
+      <div class="ann-body"><strong>Verification trust badge</strong> — explains that residents are verified via building entry code. Tests whether visible safety signals lower the social barrier to joining strangers' food-sharing community. <span class="atag">Tests A2: Trust between strangers</span></div>
+    </div>
+    <div class="ann">
+      <div class="ann-num">3</div>
+      <div class="ann-body"><strong>Real initials on avatars</strong> — showing real neighbour initials (not generic icons) creates a sense of real community identity before the user commits to joining. <span class="atag">Tests A2: Social comfort</span></div>
+    </div>
+  </div>
+
+  <div class="annotations" id="ann-1" style="display:none">
+    <div class="ann-title">Screen annotations</div>
+    <div class="ann">
+      <div class="ann-num">1</div>
+      <div class="ann-body"><strong>Barcode scan as primary CTA</strong> — placed above manual entry to test whether scan-first reduces friction enough for users to log items. Peer testing showed manual typing causes immediate drop-off. <span class="atag">Tests A1: Will users actually log items?</span></div>
+    </div>
+    <div class="ann">
+      <div class="ann-num">2</div>
+      <div class="ann-body"><strong>"Auto-detected from barcode" tag</strong> — signals to users that the app did the work. Tests whether perceived low effort is sufficient to sustain daily or weekly logging habits. <span class="atag">Tests A1: Logging sustainability</span></div>
+    </div>
+    <div class="ann">
+      <div class="ann-num">3</div>
+      <div class="ann-body"><strong>Prominent expiry date field</strong> — pre-filled and highlighted. Tests whether users confirm or ignore auto-detected expiry dates — the quality of this data determines the whole notification system. <span class="atag">Tests A5: Expiry awareness</span></div>
+    </div>
+  </div>
+
+  <div class="annotations" id="ann-2" style="display:none">
+    <div class="ann-title">Screen annotations</div>
+    <div class="ann">
+      <div class="ann-num">1</div>
+      <div class="ann-body"><strong>Expiry alert with inline Share CTA</strong> — the core test for A5: does pairing an expiry notification directly with a one-tap "share with building" action produce different behaviour than a bare reminder? <span class="atag">Tests A5: Notifications → action</span></div>
+    </div>
+    <div class="ann">
+      <div class="ann-num">2</div>
+      <div class="ann-body"><strong>Red/amber/green expiry badges</strong> — urgency-coded visual system. Tests whether colour-coded UI cues cause users to prioritise consumption or sharing without needing to read dates carefully. <span class="atag">Tests A5: Visual urgency nudges</span></div>
+    </div>
+    <div class="ann">
+      <div class="ann-num">3</div>
+      <div class="ann-body"><strong>Demand signal nudge card</strong> — "3 neighbours want Dairy items" shows real community pull. Tests whether social demand signals increase sharing likelihood beyond what a plain notification would achieve. <span class="atag">Tests A2: Community engagement</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const labels = ['Screen 1 of 3 — Building Join','Screen 2 of 3 — Add Food Item','Screen 3 of 3 — Expiry Alert + Share'];
+function show(n) {
+  [0,1,2].forEach(i => {
+    document.getElementById('p'+i).classList.toggle('on', i===n);
+    document.getElementById('ann-'+i).style.display = i===n ? 'block' : 'none';
+    document.querySelectorAll('.nav button')[i].classList.toggle('active', i===n);
+  });
+  document.getElementById('screen-label').textContent = labels[n];
+}
+</script>
+</body>
+</html>
